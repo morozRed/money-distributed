@@ -2,6 +2,7 @@
 
 require 'bigdecimal'
 require 'money/distributed/redis'
+require 'money/distributed/read_write_lock'
 
 class Money
   module Distributed
@@ -17,7 +18,7 @@ class Money
         @cache_ttl = cache_ttl
         @cache_updated_at = nil
 
-        @mutex = Mutex.new
+        @lock = Concurrent::ReentrantReadWriteLock.new
       end
 
       def add_rate(iso_from, iso_to, rate)
@@ -58,7 +59,7 @@ class Money
       end
 
       def cached_rates
-        @mutex.synchronize do
+        Money::Distributed::ReadWriteLock.read(@lock) do
           retrieve_rates if @cache.empty? || cache_outdated?
           @cache
         end
@@ -72,20 +73,26 @@ class Money
       end
 
       def clear_cache
-        @mutex.synchronize do
+        Money::Distributed::ReadWriteLock.write(@lock) do
           @cache.clear
         end
       end
 
       def retrieve_rates
+        updated_cache = {}
+
         @redis.exec do |r|
-          r.hgetall(REDIS_KEY).each_with_object(@cache) do |(key, val), h|
+          r.hgetall(REDIS_KEY).each_with_object(updated_cache) do |(key, val), h|
             next if val.nil? || val == ''
 
             h[key] = BigDecimal(val)
           end
         end
-        @cache_updated_at = Time.now
+
+        Money::Distributed::ReadWriteLock.write(@lock) do
+          @cache = updated_cache
+          @cache_updated_at = Time.now
+        end
       end
     end
   end
