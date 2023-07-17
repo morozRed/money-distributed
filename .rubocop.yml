@@ -3,3 +3,6 @@ Style/FileName:
 
 Gemspec/RequiredRubyVersion:
  Enabled: false
+
+Metrics/MethodLength:
+  Max: 11
