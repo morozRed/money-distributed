@@ -1,8 +1,5 @@
+# typed: true
 # frozen_string_literal: true
-
-require 'bigdecimal'
-require 'money/distributed/redis'
-require 'money/distributed/read_write_lock'
 
 class Money
   module Distributed
@@ -40,7 +37,7 @@ class Money
           end
         end
 
-        block_given? ? enum.each(&block) : enum
+        block ? enum.each(&block) : enum
       end
 
       def transaction
@@ -52,9 +49,7 @@ class Money
         [self.class, @cache_ttl]
       end
 
-      private
-
-      def key_for(iso_from, iso_to)
+      private def key_for(iso_from, iso_to)
         [iso_from, iso_to].join(INDEX_KEY_SEPARATOR).upcase
       end
 
@@ -65,11 +60,11 @@ class Money
         end
       end
 
-      def cache_outdated?
+      private def cache_outdated?
         return false unless @cache_ttl
 
         @cache_updated_at.nil? ||
-          @cache_updated_at < Time.now - @cache_ttl
+        @cache_updated_at < Time.now - @cache_ttl
       end
 
       def clear_cache
@@ -78,7 +73,8 @@ class Money
         end
       end
 
-      def retrieve_rates
+
+      private def retrieve_rates
         updated_cache = {}
 
         @redis.exec do |r|

@@ -1,3 +1,4 @@
+# typed: false
 # frozen_string_literal: true
 
 require 'spec_helper'
@@ -27,6 +28,6 @@ describe Money::Distributed::Redis do
   it "doesn't accept other classes" do
     redis = double(ping: true)
     expect { described_class.new(redis).exec(&:ping) }.to \
-      raise_error(ArgumentError)
+      raise_error(TypeError)
   end
 end
