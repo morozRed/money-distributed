@@ -29,6 +29,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rubocop'
   spec.add_development_dependency 'timecop'
 
+  spec.add_dependency 'concurrent-ruby'
   spec.add_dependency 'connection_pool'
   spec.add_dependency 'money', '>= 6.6.0'
   spec.add_dependency 'redis'
