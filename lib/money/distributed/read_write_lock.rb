@@ -1,11 +1,17 @@
+# typed: strict
 # frozen_string_literal: true
 
-require 'concurrent-ruby'
-
-class Money
-  module Distributed
-    # ReadWriteLock for `Money::Distributed::Storage` that ensures thread safety
+module Cache
+  module InMemory
     class ReadWriteLock
+      extend T::Sig
+
+      sig do
+        params(
+          lock: Concurrent::ReentrantReadWriteLock,
+          _: T.proc.returns(T.untyped),
+        ).returns(T.untyped)
+      end
       def self.read(lock, &_)
         lock.acquire_read_lock
         begin
@@ -16,6 +22,12 @@ class Money
         end
       end
 
+      sig do
+        params(
+          lock: Concurrent::ReentrantReadWriteLock,
+          _: T.proc.void,
+        ).void
+      end
       def self.write(lock, &_)
         lock.acquire_write_lock
         begin
