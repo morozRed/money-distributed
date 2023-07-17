@@ -1,6 +1,5 @@
+# typed: true
 # frozen_string_literal: true
-
-require 'money'
 
 class Money
   module Distributed
@@ -17,22 +16,20 @@ class Money
 
           currencies.each { |cur| add_rate(cur, cur, 1) }
 
-          currencies.combination(2).each do |curr1, curr2|
-            rate = rates[curr2] / rates[curr1]
-            add_rate(curr1, curr2, rate)
+          currencies.combination(2).each do |curr_1, curr_2|
+            rate = rates[curr_2] / rates[curr_1]
+            add_rate(curr_1, curr_2, rate)
           end
         end
 
-        private
-
-        def add_rate(from_iso, to_iso, rate)
+        private def add_rate(from_iso, to_iso, rate)
           @bank.add_rate(from_iso, to_iso, rate.round(4))
           return if from_iso == to_iso
 
           @bank.add_rate(to_iso, from_iso, (1 / rate).round(4))
         end
 
-        def exchange_rates
+        private def exchange_rates
           raise NotImplementedError
         end
       end

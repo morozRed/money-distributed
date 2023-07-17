@@ -1,7 +1,5 @@
+# typed: true
 # frozen_string_literal: true
-
-require 'bigdecimal'
-require 'money/distributed/redis'
 
 class Money
   module Distributed
@@ -39,7 +37,7 @@ class Money
           end
         end
 
-        block_given? ? enum.each(&block) : enum
+        block ? enum.each(&block) : enum
       end
 
       def transaction
@@ -51,33 +49,31 @@ class Money
         [self.class, @cache_ttl]
       end
 
-      private
-
-      def key_for(iso_from, iso_to)
+      private def key_for(iso_from, iso_to)
         [iso_from, iso_to].join(INDEX_KEY_SEPARATOR).upcase
       end
 
-      def cached_rates
+      private def cached_rates
         @mutex.synchronize do
           retrieve_rates if @cache.empty? || cache_outdated?
           @cache
         end
       end
 
-      def cache_outdated?
+      private def cache_outdated?
         return false unless @cache_ttl
 
         @cache_updated_at.nil? ||
-          @cache_updated_at < Time.now - @cache_ttl
+        @cache_updated_at < Time.now - @cache_ttl
       end
 
-      def clear_cache
+      private def clear_cache
         @mutex.synchronize do
           @cache.clear
         end
       end
 
-      def retrieve_rates
+      private def retrieve_rates
         @redis.exec do |r|
           r.hgetall(REDIS_KEY).each_with_object(@cache) do |(key, val), h|
             next if val.nil? || val == ''

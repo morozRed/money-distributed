@@ -1,12 +1,13 @@
+# typed: false
 # frozen_string_literal: true
 
 require 'spec_helper'
 
 describe Money::Distributed::Storage do
+  subject { described_class.new(redis, ttl) }
+
   let(:redis) { Redis.new }
   let(:ttl) { 3600 }
-
-  subject { described_class.new(redis, ttl) }
 
   it 'stores rates in redis' do
     subject.add_rate 'USD', 'RUB', 60.123

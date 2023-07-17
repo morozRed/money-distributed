@@ -1,5 +1,49 @@
-Style/FileName:
+inherit_from: .rubocop_todo.yml
+
+inherit_gem:
+  rubocop-dbl:
+    - config/dbl.yml
+
+AllCops:
+  TargetRubyVersion: 3.0
+  Exclude:
+    - 'sorbet/**/*'
+    - 'bin/*'
+    - 'vendor/**/*'
+
+Layout/LineLength:
+  Max: 120
+
+Style/IfUnlessModifier:
   Enabled: false
 
-Gemspec/RequiredRubyVersion:
- Enabled: false
+Lint/UnusedMethodArgument:
+  Enabled: false
+
+Style/AccessModifierDeclarations:
+  EnforcedStyle: inline
+
+Naming/PredicateName:
+  Enabled: false
+
+Lint/BooleanSymbol:
+  Enabled: false
+
+Style/HashSyntax:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Naming/BlockForwarding:
+  Enabled: false
+
+Metrics/MethodLength:
+  CountAsOne: ['array', 'heredoc', 'method_call']
+
+Gemspec/DevelopmentDependencies:
+  EnforcedStyle: gemspec
+
+# we do not have active support for Time.zone.now
+Rails/TimeZone:
+  Enabled: false

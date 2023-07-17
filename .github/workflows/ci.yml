@@ -31,7 +31,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: vendor/bundle
-          key: ${{ runner.os }}-${{ matrix.ruby }}-${{ matrix.redis-version }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          key: ${{ runner.os }}-${{ matrix.ruby }}-${{ matrix.redis-version }}-gems-${{ hashFiles('**/Gemfile.lock') }}-v2
           restore-keys: |
             ${{ runner.os }}-gems-
 
@@ -44,5 +44,31 @@ jobs:
       - name: Run RSspec
         run: bundle exec rspec --format documentation
 
+      - name: Run Sorbet Typechecks
+        run: bundle exec spoom tc
+  lint:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2
+
+      - uses: actions/cache@v3
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-3.2-gems-${{ hashFiles('**/Gemfile.lock') }}-v2
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: bundle install
+        run: |
+          gem install bundler
+          bundle config path vendor/bundle
+          bundle install -j $(getconf _NPROCESSORS_ONLN) --retry 3
+
       - name: Run Rubocop
-        run: bundle exec rubocop
+        run: bundle exec rubocop --parallel
