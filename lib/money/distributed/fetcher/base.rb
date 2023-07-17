@@ -14,7 +14,7 @@ class Money
           rates = exchange_rates
           currencies = rates.keys
 
-          currencies.each { |cur| add_rate(cur, cur, 1) }
+          currencies.each { add_rate(_1, _1, 1) }
 
           currencies.combination(2).each do |curr_1, curr_2|
             rate = rates[curr_2] / rates[curr_1]

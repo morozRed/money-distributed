@@ -35,7 +35,7 @@ class Money
         when ::Redis
           proc { |&b| b.call(redis) }
         when ConnectionPool
-          proc { |&b| redis.with { |r| b.call(r) } }
+          proc { |&b| redis.with { b.call(_1) } }
         when Hash
           build_redis_proc(::Redis.new(redis))
         when Proc
