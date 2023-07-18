@@ -73,7 +73,6 @@ class Money
         end
       end
 
-
       private def retrieve_rates
         updated_cache = {}
 
