@@ -84,10 +84,8 @@ class Money
           end
         end
 
-        Money::Distributed::ReadWriteLock.write(@lock) do
-          @cache = updated_cache
-          @cache_updated_at = Time.now
-        end
+        @cache = updated_cache
+        @cache_updated_at = Time.now
       end
     end
   end
