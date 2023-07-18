@@ -35,4 +35,45 @@ describe Money::Distributed::Storage do
     Timecop.freeze(Time.now + ttl + 1)
     expect(subject.get_rate('USD', 'RUB')).to eq 70.456
   end
+
+  context 'when multiple threads' do
+    let(:storage) { subject }
+    let(:rates) do
+      {
+        'USD_TO_EUR' => '0.85',
+        'EUR_TO_USD' => '1.18',
+      }
+    end
+
+    before do
+      rates.each do |key, rate|
+        redis.hset(described_class::REDIS_KEY, key, rate)
+      end
+    end
+
+    # rubocop:disable RSpec/ExampleLength
+    it 'maintains cache consistency with concurrent reads and writes' do
+      storage.clear_cache
+
+      threads = []
+      10.times do
+        threads << Thread.new do
+          1000.times do
+            key, rate = rates.to_a.sample
+            iso_from, iso_to = key.split(described_class::INDEX_KEY_SEPARATOR)
+            storage.add_rate(iso_from, iso_to, rate)
+            expect(storage.get_rate(iso_from, iso_to)).to eq(BigDecimal(rate))
+          end
+        end
+      end
+
+      threads.each(&:join)
+
+      rates.each do |key, rate|
+        expect(storage.get_rate(*key.split(described_class::INDEX_KEY_SEPARATOR)))
+          .to eq(BigDecimal(rate))
+      end
+    end
+    # rubocop:enable RSpec/ExampleLength
+  end
 end
