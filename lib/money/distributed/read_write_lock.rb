@@ -1,8 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
-module Cache
-  module InMemory
+class Money
+  module Distributed
     class ReadWriteLock
       extend T::Sig
 
